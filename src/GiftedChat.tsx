@@ -59,10 +59,11 @@ import * as utils from './utils'
 
 dayjs.extend(localizedFormat)
 
-interface GiftedChatRef {
+export interface GiftedChatRef {
   resetInputToolbar: () => void
   scrollToEnd: ({ animated }: { animated: boolean }) => void | undefined
   scrollToBottom: (animated?: boolean) => void
+  _messageContainerRef: React.RefObject<FlatList<IMessage>>
 }
 
 export interface GiftedChatProps<TMessage extends IMessage = IMessage> {
@@ -316,6 +317,7 @@ function GiftedChat<TMessage extends IMessage = IMessage>(
     scrollToEnd: ({ animated }: { animated: boolean }) =>
       messageContainerRef.current?.scrollToEnd({ animated }),
     scrollToBottom,
+    _messageContainerRef: messageContainerRef,
   }))
 
   const getTextFromProp = (fallback: string) => {
