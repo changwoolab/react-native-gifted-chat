@@ -6,7 +6,14 @@ import {
 import dayjs from 'dayjs'
 import localizedFormat from 'dayjs/plugin/localizedFormat'
 import PropTypes from 'prop-types'
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, {
+  RefObject,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import {
   Animated,
   FlatList,
@@ -52,7 +59,14 @@ import * as utils from './utils'
 
 dayjs.extend(localizedFormat)
 
+interface GiftedChatRef {
+  resetInputToolbar: () => void
+  scrollToEnd: ({ animated }: { animated: boolean }) => void | undefined
+  scrollToBottom: (animated?: boolean) => void
+}
+
 export interface GiftedChatProps<TMessage extends IMessage = IMessage> {
+  ref?: RefObject<GiftedChatRef>
   /* Messages to display */
   messages?: TMessage[]
   /* Typing Indicator state */
@@ -228,6 +242,7 @@ function GiftedChat<TMessage extends IMessage = IMessage>(
   props: GiftedChatProps,
 ) {
   const {
+    ref,
     messages = [],
     text = undefined,
     initialText = '',
@@ -295,6 +310,13 @@ function GiftedChat<TMessage extends IMessage = IMessage>(
       isMountedRef.current = false
     }
   }, [messages, text])
+
+  useImperativeHandle(ref, () => ({
+    resetInputToolbar,
+    scrollToEnd: ({ animated }: { animated: boolean }) =>
+      messageContainerRef.current?.scrollToEnd({ animated }),
+    scrollToBottom,
+  }))
 
   const getTextFromProp = (fallback: string) => {
     if (text === undefined) {
@@ -447,7 +469,7 @@ function GiftedChat<TMessage extends IMessage = IMessage>(
   }
 
   const renderMessages = () => {
-    const { messagesContainerStyle, ...messagesContainerProps } = props
+    const { messagesContainerStyle, ref, ...messagesContainerProps } = props
 
     const fragment = (
       <View
